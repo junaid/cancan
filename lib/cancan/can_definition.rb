@@ -33,6 +33,9 @@ module CanCan
 
     def can?(action, subject, extra_args)
       result = can_without_base_behavior?(action, subject, extra_args)
+      if result == "disabled"
+        result = (extra_args.size > 0 && extra_args[0][:return_disabled] ? "disabled" : false)
+      end
       @base_behavior ? result : !result
     end
 

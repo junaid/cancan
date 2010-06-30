@@ -9,7 +9,7 @@ describe CanCan::Ability do
   it "should be able to :read anything" do
     @ability.can :read, :all
     @ability.can?(:read, String).should be_true
-    
+    @ability.can?(:read, 123).should be_true    
   end
 
   it "should return disabled if we pass parameter :return_disabled = true and ability block also return 'disabled'" do

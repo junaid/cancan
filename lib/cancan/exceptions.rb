@@ -25,14 +25,18 @@ module CanCan
   #   exception.message # => "Default error message"
   #
   # See ControllerAdditions#authorized! for more information on rescuing from this exception.
+  # You can also give redirect_url to redirect user to certain page if he hasn't access to
+  # certain controller action.
+  # raise CanCan::AccessDenied.new("Not authorized!", :read, Article, "/login")  
   class AccessDenied < Error
     attr_reader :action, :subject
     attr_writer :default_message
-
-    def initialize(message = nil, action = nil, subject = nil)
+    attr_reader :redirect_url
+    def initialize(message = nil, action = nil, subject = nil, redirect_url="/")
       @message = message
       @action = action
       @subject = subject
+      @redirect_url = redirect_url
       @default_message = "You are not authorized to access this page."
     end
 

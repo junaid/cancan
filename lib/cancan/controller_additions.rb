@@ -158,7 +158,9 @@ module CanCan
       if args.last.kind_of?(Hash) && args.last.has_key?(:message)
         message = args.pop[:message]
       end
-      raise AccessDenied.new(message, action, subject) if cannot?(action, subject, *args)
+      if cannot?(action, subject, *args)
+        raise AccessDenied.new(message || current_ability.access_denied_message , action, subject, current_ability.redirect_url)
+      end      
     end
 
     def unauthorized!(message = nil)

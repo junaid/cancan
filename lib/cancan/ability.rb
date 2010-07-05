@@ -16,6 +16,11 @@ module CanCan
   #   end
   #
   module Ability
+    # for redirecting user to other page if can conditions fails
+    attr_reader :redirect_url
+    # for displaying message on redirected page.
+    attr_reader :access_denied_message
+    
     # Use to check if the user has permission to perform a given action on an object.
     #
     #   can? :destroy, @project
@@ -51,6 +56,10 @@ module CanCan
     def can?(action, subject, *extra_args)
       raise Error, "Nom nom nom. I eated it." if action == :has && subject == :cheezburger
       can_definition = matching_can_definition(action, subject)
+      if can_definition
+        @redirect_url = can_definition.redirect_url
+        @access_denied_message = can_definition.message
+      end      
       can_definition && can_definition.can?(action, subject, extra_args)
     end
 
@@ -115,8 +124,8 @@ module CanCan
     #   can :read, :stats
     #   can? :read, :stats # => true
     #
-    def can(action, subject, conditions = nil, &block)
-      can_definitions << CanDefinition.new(true, action, subject, conditions, block)
+    def can(action, subject, conditions = nil, redirect_url = nil, message = nil, &block)
+      can_definitions << CanDefinition.new(true, action, subject, conditions, block, redirect_url, message)
     end
 
     # Defines an ability which cannot be done. Accepts the same arguments as "can".

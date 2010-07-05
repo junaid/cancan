@@ -2,6 +2,7 @@ module CanCan
   # Handle the load and authorization controller logic so we don't clutter up all controllers with non-interface methods.
   # This class is used internally, so you do not need to call methods directly on it.
   class ResourceAuthorization # :nodoc:
+    @parent_objects_list = nil
     def self.add_before_filter(controller_class, method, options = {})
       controller_class.before_filter(options.slice(:only, :except)) do |controller|
         ResourceAuthorization.new(controller, controller.params, options.except(:only, :except)).send(method)
@@ -12,6 +13,7 @@ module CanCan
       @controller = controller
       @params = params
       @options = options
+      @parent_objects_list = {}
     end
 
     def load_and_authorize_resource
@@ -30,9 +32,13 @@ module CanCan
         end
       end
     end
-
+    
     def authorize_resource
-      @controller.authorize!(@params[:action].to_sym, resource.model_instance || resource.model_class)
+      if @parent_objects_list.size > 0
+        @controller.authorize!(@params[:action].to_sym, resource.model_instance || resource.model_class, @parent_objects_list)
+      else
+        @controller.authorize!(@params[:action].to_sym, resource.model_instance || resource.model_class)
+      end
     end
 
     private
@@ -46,8 +52,10 @@ module CanCan
       [@options[:nested]].flatten.compact.each do |name|
         id = @params["#{name}_id".to_sym]
         if id
-          parent = ControllerResource.new(@controller, name, parent)
-          parent.find(id)
+          parent = ControllerResource.new(@controller, name, parent)          
+          parent_object = parent.find(id)
+          @parent_objects_list["#{name}".to_sym]= parent_object
+          parent_object
         else
           parent = nil
         end

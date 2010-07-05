@@ -5,17 +5,23 @@ module CanCan
   class CanDefinition # :nodoc:
     include ActiveSupport::Inflector
     attr_reader :block
-    
+    attr_reader :redirect_url
+    attr_reader :message
+
     # The first argument when initializing is the base_behavior which is a true/false
     # value. True for "can" and false for "cannot". The next two arguments are the action
     # and subject respectively (such as :read, @project). The third argument is a hash
-    # of conditions and the last one is the block passed to the "can" call.
-    def initialize(base_behavior, action, subject, conditions, block)
+    # of conditions and the fourth one is the block passed to the "can" call.The next two
+    # arguments are string types, redirect_url for redirecting user to page in case of
+    # access denied, message for displaying custom message on redirected page.
+    def initialize(base_behavior, action, subject, conditions, block, redirect_url = nil, message = nil)
       @base_behavior = base_behavior
       @actions = [action].flatten
       @subjects = [subject].flatten
       @conditions = conditions || {}
       @block = block
+      @redirect_url = redirect_url
+      @message = message
     end
 
     # Accepts a hash of aliased actions and returns an array of actions which match.
@@ -41,7 +47,7 @@ module CanCan
 
     # Returns a hash of conditions. If the ":tableize => true" option is passed
     # it will pluralize the association conditions to match the table name.
-    def conditions(options = {})
+    def conditions(options = {})      
       if options[:tableize] && @conditions.kind_of?(Hash)
         @conditions.inject({}) do |tableized_conditions, (name, value)|
           name = tableize(name).to_sym if value.kind_of? Hash

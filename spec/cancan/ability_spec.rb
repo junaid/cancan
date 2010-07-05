@@ -5,11 +5,11 @@ describe CanCan::Ability do
     @ability = Object.new
     @ability.extend(CanCan::Ability)
   end
-
+  
   it "should be able to :read anything" do
     @ability.can :read, :all
     @ability.can?(:read, String).should be_true
-    @ability.can?(:read, 123).should be_true    
+    @ability.can?(:read, 123).should be_true
   end
 
   it "should return disabled if we pass parameter :return_disabled = true and ability block also return 'disabled'" do
@@ -208,4 +208,29 @@ describe CanCan::Ability do
       @ability.can? :has, :cheezburger
     }.should raise_exception(CanCan::Error, "Nom nom nom. I eated it.")
   end
+
+  it "should set redirect_url & message" do
+    @can_definitions = @ability.can :read, Array, nil, "\login", "You have to login to access this page"
+    newly_added_ability = @can_definitions.last
+    newly_added_ability.redirect_url.should == "\login"
+    newly_added_ability.message == "You have to login to access this page"
+  end
+
+  it "should set ability redirect_url and access_denied_message if you give those params in the ability definition" do
+    @ability.can :read, Array, nil, "\login", "You have to login to access this page" do |params|
+      false
+    end
+    @ability.can? :read, [1,2,3]
+    @ability.redirect_url.should == "\login"
+    @ability.access_denied_message == "You have to login to access this page"
+  end
+
+  it "should return ability redirect_url & access_denied_message if you don't pass in ability definition" do
+    @ability.can :read, Array do |params|
+      false
+    end    
+    @ability.can? :read, [1,2,3]
+    @ability.redirect_url.should be_nil
+    @ability.access_denied_message.should be_nil
+  end  
 end

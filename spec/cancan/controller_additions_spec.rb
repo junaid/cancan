@@ -30,6 +30,20 @@ describe CanCan::ControllerAdditions do
     @controller.current_ability.can :read, :foo
     lambda { @controller.authorize!(:read, :foo) }.should_not raise_error
   end
+     it "should raise access denied exception with custom message and redirect_url if both are specified" do
+       begin
+         @controller.current_ability.can :read, :foo, nil, "/login", "you have to login to access this page"  do
+           false
+         end
+         @controller.authorize! :read, :foo
+       rescue CanCan::AccessDenied => e
+         e.message.should == "you have to login to access this page"
+         e.redirect_url == "/login"
+       else
+         fail "Expected CanCan::AccessDenied exception to be raised"
+       end
+     end                               
+
 
   it "should raise access denied exception with default message if not specified" do
     begin

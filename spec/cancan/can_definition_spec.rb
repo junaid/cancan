@@ -3,7 +3,9 @@ require "spec_helper"
 describe CanCan::CanDefinition do
   before(:each) do
     @conditions = {}
-    @can = CanCan::CanDefinition.new(true, :read, Integer, @conditions, nil)
+    @redirect_url = "/login"
+    @message = "you have to login to access requested page."    
+    @can = CanCan::CanDefinition.new(true, :read, Integer, @conditions, nil, @redirect_url, @message)
   end
 
   it "should return no association joins if none exist" do
@@ -41,4 +43,10 @@ describe CanCan::CanDefinition do
     can = CanCan::CanDefinition.new(true, :read, Integer, nil, nil)
     can.association_joins.should be_nil
   end
+
+  it "should return redirect_url & message" do
+    @can.redirect_url.should == @redirect_url
+    @can.message.should == @message    
+  end
+  
 end

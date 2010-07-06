@@ -31,7 +31,7 @@ module CanCan
   class AccessDenied < Error
     attr_reader :action, :subject
     attr_writer :default_message
-    attr_write :default_redirect
+    attr_writer :default_redirect
     attr_reader :redirect_url
     def initialize(message = nil, action = nil, subject = nil, redirect_url = nil)
       @message = message
